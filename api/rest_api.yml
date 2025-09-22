@@ -1,0 +1,601 @@
+openapi: 3.1.0
+
+info:
+  title: Travelgram API
+  description: Current API describes interaction with Travelgram
+  version: 1.0.0
+paths:
+  /api/v1/media/upload:
+    post:
+      tags:
+        - Media
+      summary: 'Загрузить изображение для поста'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                user_id:
+                  type: string
+              required:
+                - image
+                - user_id
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  image_url:
+                    type: string
+        400:
+          description: Bad Request
+        413:
+          description: File too large
+        500:
+          description: Internal server error
+
+  /api/v1/posts:
+    post:
+      tags:
+        - Posts
+      summary: 'Метод для создания публикации пользователя'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createPost'
+      responses:
+        200:
+          description: OK
+        500:
+          description: Internal server error
+
+  /api/v1/posts/list:
+    post:
+      tags:
+        - Posts
+      summary: 'Метод для получения списка публикаций'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/listPosts'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/post'
+        500:
+          description: Internal server error
+
+  /api/v1/posts/{post_id}:
+    put:
+      tags:
+        - Posts
+      summary: 'Метод для изменения публикации. С помощью этого метода можно также удалять публикации'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updatePost'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  posts:
+                    items:
+                      $ref: '#/components/schemas/post'
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+
+  /api/v1/posts/{post_id}/reactions:
+    post:
+      tags:
+        - Reactions
+      summary: 'Создать реакцию на публикацию'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createReaction'
+      responses:
+        200:
+          description: OK
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+    get:
+      tags:
+        - Reactions
+      summary: 'Получить список реакций'
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: reaction_type
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reactions:
+                    items:
+                      $ref: '#/components/schemas/reaction'
+        500:
+          description: Internal server error
+
+  /api/v1/users/{user_id}/feed:
+    get:
+      tags:
+        - Users
+      summary: 'Лента пользователя'
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  posts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/post'
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+
+  /api/v1/users/{user_id}/follow:
+    post:
+      tags:
+        - Users
+      summary: 'Метод для подписки на пользователя'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/follow'
+      responses:
+        200:
+          description: OK
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+    delete:
+      tags:
+        - Users
+      summary: 'Метод для отписки от пользователя'
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+
+  /api/v1/users/{user_id}/followings:
+    get:
+      tags:
+        - Users
+      summary: 'Метод для получения подписок пользователя'
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    items:
+                      $ref: '#/components/schemas/user'
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+
+  /api/v1/users/{user_id}/followers:
+    get:
+      tags:
+        - Users
+      summary: 'Метод для получения подписчиков пользователя'
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    items:
+                      $ref: '#/components/schemas/user'
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+                      
+  /api/v1/locations/popular:
+    get:
+      tags:
+        - Locations
+      summary: 'Список популярных мест'
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [ 7d, 30d, all_time ]
+            default: 30d
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  locations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/location'
+
+  /api/v1/locations/{location_id}/posts:
+    get:
+      tags:
+        - Locations
+      summary: 'Посты в этом месте'
+      parameters:
+        - name: location_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  posts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/post'
+
+components:
+  schemas:
+    post:
+      type: object
+      properties:
+        post_id:
+          type: string
+        author_id:
+          type: string
+        description:
+          type: string
+        image_url:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+        is_deleted:
+          type: boolean
+        location:
+          type: object
+          properties:
+            lon:
+              type: number
+              format: double
+            lat:
+              type: number
+              format: double
+          required:
+            - lon
+            - lat
+        aggregates:
+          type: object
+          properties:
+            total_likes:
+              type: integer
+            total_comments:
+              type: integer
+            total_followers:
+              type: integer
+            total_followings:
+              type: integer
+          required:
+            - total_likes
+            - total_comments
+      required:
+        - post_id
+        - author_id
+        - image_url
+        - created_at
+        - is_deleted
+        - aggregates
+
+    createPost:
+      type: object
+      properties:
+        author_id:
+          type: string
+        description:
+          type: string
+        image_url:
+          type: string
+        location:
+          type: object
+          properties:
+            lon:
+              type: number
+              format: double
+            lat:
+              type: number
+              format: double
+          required:
+            - lon
+            - lat
+      required:
+        - author_id
+
+    listPosts:
+      type: object
+      properties:
+        limit:
+          type: integer
+        offset:
+          type: integer
+        filters:
+          type: object
+          properties: 
+            user_id:
+              type: array
+              items:
+                type: string
+
+    updatePost:
+      type: object
+      properties:
+        post_id:
+          type: string
+        author_id:
+          type: string
+        description:
+          type: string
+        image_url:
+          type: string
+        is_deleted:
+          type: boolean
+        location:
+          type: object
+          properties:
+            lon:
+              type: number
+              format: double
+            lat:
+              type: number
+              format: double
+          required:
+            - lon
+            - lat
+      required:
+        - post_id
+        - author_id
+
+    createReaction:
+      type: object
+      properties:
+        post_id:
+          type: string
+        author_id:
+          type: string
+        content:
+          type: string
+        reaction_type:
+          type: integer
+      required:
+        - post_id
+        - author_id
+        - reaction_type
+
+    reaction:
+      type: object
+      properties:
+        post_id:
+          type: string
+        author_id:
+          type: string
+        content:
+          type: string
+        reaction_type:
+          type: integer
+        created_at:
+          type: string
+      required:
+        - post_id
+        - author_id
+        - reaction_type
+
+    listReactions:
+      type: object
+      properties:
+        post_id:
+          type: string
+        reaction_type:
+          type: integer
+      required:
+        - post_id
+        - reaction_type
+
+    follow:
+      type: object
+      properties:
+        follower_id:
+          type: string
+        followee_id:
+          type: string
+        created_at:
+          type: string
+      required:
+        - follower_id
+        - followee_id
+
+    user:
+      type: object
+      properties:
+        user_id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        is_deleted:
+          type: boolean
+        aggregates:
+          type: object
+          properties:
+            total_followers:
+              type: integer
+            total_followings:
+              type: integer
+            total_posts:
+              type: integer
+          required:
+            - total_followers
+            - total_followings
+            - total_posts
+      required:
+        - user_id
+        - name
+        - email
+        - is_deleted
+        - aggregates
+
+    location:
+      type: object
+      properties:
+        location_id:
+          type: string
+        name:
+          type: string
+        lat:
+          type: number
+        lon:
+          type: number
+        aggregates:
+          type: object
+          properties:
+            period_date:
+              type: string
+            total_posts:
+              type: integer
+            total_likes:
+              type: integer
+          required:
+            - period_date
+            - total_posts
+            - total_likes
+      required:
+        - location_id
+        - name
+        - lat
+        - lon
+        - aggregates
