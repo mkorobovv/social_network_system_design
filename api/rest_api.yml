@@ -4,12 +4,20 @@ info:
   title: Travelgram API
   description: Current API describes interaction with Travelgram
   version: 1.0.0
+
+security:
+  - bearerAuth: [ ]
+
 paths:
   /api/v1/media/upload:
     post:
       tags:
         - Media
-      summary: 'Загрузить изображение для поста'
+      summary: 'Загрузить изображение'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/idempotencyKey'
       requestBody:
         required: true
         content:
@@ -20,11 +28,8 @@ paths:
                 image:
                   type: string
                   format: binary
-                user_id:
-                  type: string
               required:
                 - image
-                - user_id
       responses:
         200:
           description: OK
@@ -37,6 +42,8 @@ paths:
                     type: string
         400:
           description: Bad Request
+        401:
+          description: Unauthorized
         413:
           description: File too large
         500:
@@ -46,7 +53,11 @@ paths:
     post:
       tags:
         - Posts
-      summary: 'Метод для создания публикации пользователя'
+      summary: 'Создать публикацию'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/idempotencyKey'
       requestBody:
         required: true
         content:
@@ -54,29 +65,16 @@ paths:
             schema:
               $ref: '#/components/schemas/createPost'
       responses:
-        200:
-          description: OK
-        500:
-          description: Internal server error
-
-  /api/v1/posts/list:
-    post:
-      tags:
-        - Posts
-      summary: 'Метод для получения списка публикаций'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/listPosts'
-      responses:
-        200:
-          description: OK
+        201:
+          description: Created
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/post'
+        400:
+          description: Bad Request
+        401:
+          description: Unauthorized
         500:
           description: Internal server error
 
@@ -84,7 +82,9 @@ paths:
     put:
       tags:
         - Posts
-      summary: 'Метод для изменения публикации. С помощью этого метода можно также удалять публикации'
+      summary: 'Изменить публикацию'
+      security:
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
@@ -97,106 +97,203 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  posts:
-                    items:
-                      $ref: '#/components/schemas/post'
+                $ref: '#/components/schemas/post'
         404:
           description: Not found
         500:
           description: Internal server error
-
-  /api/v1/posts/{post_id}/reactions:
-    post:
+    delete:
       tags:
-        - Reactions
-      summary: 'Создать реакцию на публикацию'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/createReaction'
-      responses:
-        200:
-          description: OK
-        404:
-          description: Not found
-        500:
-          description: Internal server error
-    get:
-      tags:
-        - Reactions
-      summary: 'Получить список реакций'
+        - Posts
+      summary: 'Удалить публикацию'
+      security:
+        - bearerAuth: [ ]
       parameters:
         - name: post_id
           in: path
           required: true
           schema:
             type: string
-        - name: reaction_type
-          in: query
-          required: true
-          schema:
-            type: integer
-        - name: limit
-          in: query
-          required: true
-          schema:
-            type: integer
-        - name: offset
-          in: query
-          required: true
-          schema:
-            type: integer
+            format: uuid
       responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  reactions:
-                    items:
-                      $ref: '#/components/schemas/reaction'
+        204:
+          description: No Content
         500:
           description: Internal server error
 
-  /api/v1/users/{user_id}/feed:
-    get:
+  /api/v1/comments:
+    post:
       tags:
-        - Users
-      summary: 'Лента пользователя'
+        - Comments
+      summary: 'Прокомментировать публикацию'
+      security:
+        - bearerAuth: []
       parameters:
-        - name: user_id
+        - $ref: '#/components/parameters/idempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createComment'
+      responses:
+        201:
+          description: Created
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
+  /api/v1/comments/{comment_id}:
+    put:
+      tags:
+        - Comments
+      summary: 'Изменить комментарий'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: comment_id
           in: path
           required: true
           schema:
             type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateComment'
+      responses:
+        200:
+          description: OK
+        401:
+          description: Unauthorized
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+    delete:
+      tags:
+        - Comments
+      summary: 'Удалить комментарий'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: comment_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: No Content
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
+  /api/v1/posts/{post_id}/reactions:
+    put:
+      tags:
+        - Reactions
+      summary: 'Добавить реакцию к посту'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reaction_type:
+                  type: integer
+                  enum: [ 1 ]
+              required:
+                - reaction_type
+      responses:
+        200:
+          description: OK
+        401:
+          description: Unauthorized
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+    delete:
+      tags:
+        - Reactions
+      summary: 'Убрать реакцию'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reaction_type:
+                  type: integer
+                  enum: [ 1 ]
+              required:
+                - reaction_type
+      responses:
+        204:
+          description: No content
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
+  /api/v1/users/feeds:
+    get:
+      tags:
+        - Users
+      summary: 'Получить ленту новостей'
+      security:
+        - bearerAuth: [ ]
+      parameters:
         - name: limit
           in: query
           schema:
             type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
         - name: offset
           in: query
           schema:
             type: integer
+            minimum: 0
+            default: 0
       responses:
         200:
           description: OK
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  posts:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/post'
-        404:
-          description: Not found
+                $ref: '#/components/schemas/feedPage'
+        400:
+          description: Invalid params
+        401:
+          description: Unauthorized
         500:
           description: Internal server error
 
@@ -204,16 +301,14 @@ paths:
     post:
       tags:
         - Users
-      summary: 'Метод для подписки на пользователя'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/follow'
+      summary: 'Подписаться на пользователя'
+      security:
+        - bearerAuth: [ ]
       responses:
-        200:
-          description: OK
+        201:
+          description: Created
+        401:
+          description: Unauthorized
         404:
           description: Not found
         500:
@@ -221,18 +316,19 @@ paths:
     delete:
       tags:
         - Users
-      summary: 'Метод для отписки от пользователя'
+      summary: 'Отписаться от пользователя'
+      security:
+        - bearerAuth: [ ]
       parameters:
         - name: user_id
           in: path
           required: true
           schema:
             type: string
+            format: uuid
       responses:
-        200:
-          description: OK
-        404:
-          description: Not found
+        204:
+          description: No content
         500:
           description: Internal server error
 
@@ -247,6 +343,7 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       responses:
         200:
           description: OK
@@ -274,6 +371,7 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       responses:
         200:
           description: OK
@@ -289,85 +387,36 @@ paths:
           description: Not found
         500:
           description: Internal server error
-                      
-  /api/v1/locations/popular:
-    get:
-      tags:
-        - Locations
-      summary: 'Список популярных мест'
-      parameters:
-        - name: period
-          in: query
-          schema:
-            type: string
-            enum: [ 7d, 30d, all_time ]
-            default: 30d
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 20
-        - name: offset
-          in: query
-          schema:
-            type: integer
-            default: 0
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  locations:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/location'
 
-  /api/v1/locations/{location_id}/posts:
-    get:
-      tags:
-        - Locations
-      summary: 'Посты в этом месте'
-      parameters:
-        - name: location_id
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 20
-        - name: offset
-          in: query
-          schema:
-            type: integer
-            default: 0
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  posts:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/post'
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    idempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: >
+        Ключ идемпотентности для защиты от ретраев
+      schema:
+        type: string
+        example: 123e4567-e89b-12d3-a456-426614174000
+
   schemas:
     post:
       type: object
       properties:
         post_id:
           type: string
+          format: uuid
         author_id:
           type: string
+          format: uuid
         description:
           type: string
         image_url:
@@ -415,8 +464,6 @@ components:
     createPost:
       type: object
       properties:
-        author_id:
-          type: string
         description:
           type: string
         image_url:
@@ -434,36 +481,16 @@ components:
             - lon
             - lat
       required:
-        - author_id
-
-    listPosts:
-      type: object
-      properties:
-        limit:
-          type: integer
-        offset:
-          type: integer
-        filters:
-          type: object
-          properties: 
-            user_id:
-              type: array
-              items:
-                type: string
+        - location
+        - image_url
 
     updatePost:
       type: object
       properties:
-        post_id:
-          type: string
-        author_id:
-          type: string
         description:
           type: string
         image_url:
           type: string
-        is_deleted:
-          type: boolean
         location:
           type: object
           properties:
@@ -476,35 +503,36 @@ components:
           required:
             - lon
             - lat
-      required:
-        - post_id
-        - author_id
 
-    createReaction:
+    createComment:
       type: object
       properties:
         post_id:
           type: string
-        author_id:
-          type: string
+          format: uuid
         content:
           type: string
-        reaction_type:
-          type: integer
       required:
         - post_id
-        - author_id
-        - reaction_type
+        - content
+
+    updateComment:
+      type: object
+      properties:
+        content:
+          type: string
+      required:
+        - content
 
     reaction:
       type: object
       properties:
         post_id:
           type: string
+          format: uuid
         author_id:
           type: string
-        content:
-          type: string
+          format: uuid
         reaction_type:
           type: integer
         created_at:
@@ -514,35 +542,12 @@ components:
         - author_id
         - reaction_type
 
-    listReactions:
-      type: object
-      properties:
-        post_id:
-          type: string
-        reaction_type:
-          type: integer
-      required:
-        - post_id
-        - reaction_type
-
-    follow:
-      type: object
-      properties:
-        follower_id:
-          type: string
-        followee_id:
-          type: string
-        created_at:
-          type: string
-      required:
-        - follower_id
-        - followee_id
-
     user:
       type: object
       properties:
         user_id:
           type: string
+          format: uuid
         name:
           type: string
         email:
@@ -569,33 +574,68 @@ components:
         - is_deleted
         - aggregates
 
-    location:
+    feedItem:
       type: object
       properties:
-        location_id:
+        post_id:
           type: string
-        name:
+          format: uuid
+        author:
+          type: object
+          properties:
+            id: 
+              type: string
+              format: uuid
+            name: 
+              type: string 
+            is_followee: 
+              type: boolean
+              description: Подписан ли пользователь на автора
+          required:
+            - id
+            - name
+            - is_followee
+        location:
+          type: object
+          properties:
+            lat:
+              type: number
+              format: double
+            lon:
+              type: number
+              format: double 
+        description:
           type: string
-        lat:
-          type: number
-        lon:
-          type: number
+        image_url:
+          type: string
+        created_at:
+          type: string
+          format: date
         aggregates:
           type: object
           properties:
-            period_date:
-              type: string
-            total_posts:
-              type: integer
             total_likes:
               type: integer
-          required:
-            - period_date
-            - total_posts
-            - total_likes
+            total_comments:
+              type: integer
+        my_reaction:
+          type: integer
+          nullable: true
       required:
-        - location_id
-        - name
-        - lat
-        - lon
+        - author
+        - post_id
+        - image_url
         - aggregates
+
+    feedPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/feedItem'
+        limit:
+          type: integer
+        offset:
+          type: integer
+    
