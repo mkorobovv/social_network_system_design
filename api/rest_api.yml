@@ -471,6 +471,8 @@ components:
         location:
           type: object
           properties:
+            name:
+              type: string
             lon:
               type: number
               format: double
@@ -478,6 +480,7 @@ components:
               type: number
               format: double
           required:
+            - name
             - lon
             - lat
       required:
@@ -494,6 +497,8 @@ components:
         location:
           type: object
           properties:
+            name:
+              type: string
             lon:
               type: number
               format: double
@@ -501,6 +506,7 @@ components:
               type: number
               format: double
           required:
+            - name
             - lon
             - lat
 
@@ -580,6 +586,8 @@ components:
         location:
           type: object
           properties:
+            name:
+              type: string
             lat:
               type: number
               format: double
