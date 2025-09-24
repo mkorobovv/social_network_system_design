@@ -122,6 +122,30 @@ paths:
           description: Internal server error
 
   /api/v1/comments:
+    get:
+      tags:
+        - Comments
+      summary: 'Получить комментарии'
+      parameters:
+        - name: post_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
     post:
       tags:
         - Comments
@@ -194,11 +218,11 @@ paths:
         500:
           description: Internal server error
 
-  /api/v1/posts/{post_id}/reactions:
+  /api/v1/likes/{post_id}:
     put:
       tags:
-        - Reactions
-      summary: 'Добавить реакцию к посту'
+        - Likes
+      summary: 'Поставить лайк посту'
       security:
         - bearerAuth: [ ]
       parameters:
@@ -208,18 +232,6 @@ paths:
           schema:
             type: string
             format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                reaction_type:
-                  type: integer
-                  enum: [ 1 ]
-              required:
-                - reaction_type
       responses:
         200:
           description: OK
@@ -231,8 +243,8 @@ paths:
           description: Internal server error
     delete:
       tags:
-        - Reactions
-      summary: 'Убрать реакцию'
+        - Likes
+      summary: 'Убрать лайк'
       security:
         - bearerAuth: [ ]
       parameters:
@@ -242,18 +254,6 @@ paths:
           schema:
             type: string
             format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                reaction_type:
-                  type: integer
-                  enum: [ 1 ]
-              required:
-                - reaction_type
       responses:
         204:
           description: No content
@@ -524,24 +524,6 @@ components:
       required:
         - content
 
-    reaction:
-      type: object
-      properties:
-        post_id:
-          type: string
-          format: uuid
-        author_id:
-          type: string
-          format: uuid
-        reaction_type:
-          type: integer
-        created_at:
-          type: string
-      required:
-        - post_id
-        - author_id
-        - reaction_type
-
     user:
       type: object
       properties:
@@ -611,6 +593,8 @@ components:
         created_at:
           type: string
           format: date
+        is_liked_by_me:
+          type: bool
         aggregates:
           type: object
           properties:
@@ -618,14 +602,12 @@ components:
               type: integer
             total_comments:
               type: integer
-        my_reaction:
-          type: integer
-          nullable: true
       required:
         - author
         - post_id
         - image_url
         - aggregates
+        - is_liked_by_me
 
     feedPage:
       type: object
