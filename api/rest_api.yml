@@ -9,7 +9,7 @@ security:
   - bearerAuth: [ ]
 
 paths:
-  /api/v1/media/upload:
+  /api/v1/media:
     post:
       tags:
         - Media
@@ -25,14 +25,14 @@ paths:
             schema:
               type: object
               properties:
-                image:
+                file:
                   type: string
                   format: binary
               required:
-                - image
+                - file
       responses:
-        200:
-          description: OK
+        201:
+          description: Created
           content:
             application/json:
               schema:
@@ -219,6 +219,26 @@ paths:
           description: Internal server error
 
   /api/v1/likes/{post_id}:
+    get:
+      tags:
+        - Likes
+      summary: 'Получить лайки к посту'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/like'
     put:
       tags:
         - Likes
@@ -297,7 +317,7 @@ paths:
         500:
           description: Internal server error
 
-  /api/v1/users/{user_id}/follow:
+  /api/v1/users/follows/{user_id}:
     post:
       tags:
         - Users
@@ -332,7 +352,7 @@ paths:
         500:
           description: Internal server error
 
-  /api/v1/users/{user_id}/followings:
+  /api/v1/users/followings/{user_id}:
     get:
       tags:
         - Users
@@ -360,7 +380,7 @@ paths:
         500:
           description: Internal server error
 
-  /api/v1/users/{user_id}/followers:
+  /api/v1/users/followers/{user_id}:
     get:
       tags:
         - Users
@@ -423,8 +443,10 @@ components:
           type: string
         created_at:
           type: string
+          format: date-time
         updated_at:
           type: string
+          format: date-time
         is_deleted:
           type: boolean
         location:
@@ -542,6 +564,9 @@ components:
           type: string
         is_deleted:
           type: boolean
+        registered_at:
+          type: string
+          format: date-time
         aggregates:
           type: object
           properties:
@@ -628,4 +653,20 @@ components:
           type: integer
         offset:
           type: integer
+
+    like:
+      type: object
+      properties:
+        like_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        post_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
     
