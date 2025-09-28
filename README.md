@@ -79,3 +79,39 @@
 
 - Подсистема поиска:
     - `find_post_by_location = 116 * 100B ~= 12 KB/s`
+
+## Оценка дисков
+
+### Подсистема постов
+    
+- Медиа:
+  - `Capacity = 51 MB/s * 86400 * 365 = 1.6PB`
+  - `Disks_for_capacity = 1.6PB / 32TB = 50`
+  - `Disks_for_throughput = 51 MB/s / 100 MB/s ~= 0.5`
+  - `Disks_for_iops = 3500 / 100 = 35`
+- Метаинформация:
+  - `Capacity = 13KB/s * 86400 * 365 ~= 4 TB`
+  - `Disks_for_capacity = 4 TB / 32TB ~= 0.13`
+  - `Disks_for_throughput = 13KB/s / 100MB/s ~= 0.001`
+  - `Disks_for_iops = 3500 / 100 = 35`
+
+`Total_disks = 50 HDD`
+
+### Подсистема комментариев
+
+- `Capacity = 24 KB/s * 86400 * 365 ~= 8 TB`
+- `Disks_for_capacity = 8 TB / 32TB ~= 0.25`
+- `Disks_for_throughput = 24KB/s / 100MB/s ~= 0.002`
+- `Disks_for_iops = 116 / 100 ~= 1.16`
+
+`Total_disks = 1 HDD`
+
+### Подсистема реакций
+
+- `Capacity = 5 KB/s * 86400 * 365 ~= 157 GB`
+- `Disks_for_capacity = 157 GB / 32TB ~= 0.005`
+- `Disks_for_throughput = 5KB/s / 100MB/s ~= 0.0005`
+- `Disks_for_iops = 596 / 100 ~= 6`
+
+`Total_disks = 6 HDD`
+
