@@ -1,0 +1,672 @@
+openapi: 3.1.0
+
+info:
+  title: Travelgram API
+  description: Current API describes interaction with Travelgram
+  version: 1.0.0
+
+security:
+  - bearerAuth: [ ]
+
+paths:
+  /api/v1/media:
+    post:
+      tags:
+        - Media
+      summary: 'Загрузить изображение'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/idempotencyKey'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  image_url:
+                    type: string
+        400:
+          description: Bad Request
+        401:
+          description: Unauthorized
+        413:
+          description: File too large
+        500:
+          description: Internal server error
+
+  /api/v1/posts:
+    post:
+      tags:
+        - Posts
+      summary: 'Создать публикацию'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/idempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createPost'
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/post'
+        400:
+          description: Bad Request
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
+  /api/v1/posts/{post_id}:
+    put:
+      tags:
+        - Posts
+      summary: 'Изменить публикацию'
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updatePost'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/post'
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+    delete:
+      tags:
+        - Posts
+      summary: 'Удалить публикацию'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: No Content
+        500:
+          description: Internal server error
+
+  /api/v1/comments:
+    get:
+      tags:
+        - Comments
+      summary: 'Получить комментарии'
+      parameters:
+        - name: post_id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+    post:
+      tags:
+        - Comments
+      summary: 'Прокомментировать публикацию'
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/idempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/createComment'
+      responses:
+        201:
+          description: Created
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
+  /api/v1/comments/{comment_id}:
+    put:
+      tags:
+        - Comments
+      summary: 'Изменить комментарий'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: comment_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateComment'
+      responses:
+        200:
+          description: OK
+        401:
+          description: Unauthorized
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+    delete:
+      tags:
+        - Comments
+      summary: 'Удалить комментарий'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: comment_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: No Content
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
+  /api/v1/likes/{post_id}:
+    get:
+      tags:
+        - Likes
+      summary: 'Получить лайки к посту'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/like'
+    put:
+      tags:
+        - Likes
+      summary: 'Поставить лайк посту'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: OK
+        401:
+          description: Unauthorized
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+    delete:
+      tags:
+        - Likes
+      summary: 'Убрать лайк'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: post_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: No content
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
+  /api/v1/users/feeds:
+    get:
+      tags:
+        - Users
+      summary: 'Получить ленту новостей'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/feedPage'
+        400:
+          description: Invalid params
+        401:
+          description: Unauthorized
+        500:
+          description: Internal server error
+
+  /api/v1/users/follows/{user_id}:
+    post:
+      tags:
+        - Users
+      summary: 'Подписаться на пользователя'
+      security:
+        - bearerAuth: [ ]
+      responses:
+        201:
+          description: Created
+        401:
+          description: Unauthorized
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+    delete:
+      tags:
+        - Users
+      summary: 'Отписаться от пользователя'
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        204:
+          description: No content
+        500:
+          description: Internal server error
+
+  /api/v1/users/followings/{user_id}:
+    get:
+      tags:
+        - Users
+      summary: 'Метод для получения подписок пользователя'
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    items:
+                      $ref: '#/components/schemas/user'
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+
+  /api/v1/users/followers/{user_id}:
+    get:
+      tags:
+        - Users
+      summary: 'Метод для получения подписчиков пользователя'
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    items:
+                      $ref: '#/components/schemas/user'
+        404:
+          description: Not found
+        500:
+          description: Internal server error
+
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    idempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: >
+        Ключ идемпотентности для защиты от ретраев
+      schema:
+        type: string
+        example: 123e4567-e89b-12d3-a456-426614174000
+
+  schemas:
+    post:
+      type: object
+      properties:
+        post_id:
+          type: string
+          format: uuid
+        author_id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        image_url:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        is_deleted:
+          type: boolean
+        location:
+          type: object
+          properties:
+            lon:
+              type: number
+              format: double
+            lat:
+              type: number
+              format: double
+          required:
+            - lon
+            - lat
+        aggregates:
+          type: object
+          properties:
+            total_likes:
+              type: integer
+            total_comments:
+              type: integer
+            total_followers:
+              type: integer
+            total_followings:
+              type: integer
+          required:
+            - total_likes
+            - total_comments
+      required:
+        - post_id
+        - author_id
+        - image_url
+        - created_at
+        - is_deleted
+        - aggregates
+
+    createPost:
+      type: object
+      properties:
+        description:
+          type: string
+        image_url:
+          type: string
+        location:
+          type: object
+          properties:
+            name:
+              type: string
+            lon:
+              type: number
+              format: double
+            lat:
+              type: number
+              format: double
+          required:
+            - name
+            - lon
+            - lat
+      required:
+        - location
+        - image_url
+
+    updatePost:
+      type: object
+      properties:
+        description:
+          type: string
+        image_url:
+          type: string
+        location:
+          type: object
+          properties:
+            name:
+              type: string
+            lon:
+              type: number
+              format: double
+            lat:
+              type: number
+              format: double
+          required:
+            - name
+            - lon
+            - lat
+
+    createComment:
+      type: object
+      properties:
+        post_id:
+          type: string
+          format: uuid
+        content:
+          type: string
+      required:
+        - post_id
+        - content
+
+    updateComment:
+      type: object
+      properties:
+        content:
+          type: string
+      required:
+        - content
+
+    user:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+        is_deleted:
+          type: boolean
+        registered_at:
+          type: string
+          format: date-time
+        aggregates:
+          type: object
+          properties:
+            total_followers:
+              type: integer
+            total_followings:
+              type: integer
+            total_posts:
+              type: integer
+          required:
+            - total_followers
+            - total_followings
+            - total_posts
+      required:
+        - user_id
+        - name
+        - email
+        - is_deleted
+        - aggregates
+
+    feedItem:
+      type: object
+      properties:
+        post_id:
+          type: string
+          format: uuid
+        author:
+          type: object
+          properties:
+            id: 
+              type: string
+              format: uuid
+            name: 
+              type: string 
+            is_followee: 
+              type: boolean
+              description: Подписан ли пользователь на автора
+          required:
+            - id
+            - name
+            - is_followee
+        location:
+          type: object
+          properties:
+            name:
+              type: string
+            lat:
+              type: number
+              format: double
+            lon:
+              type: number
+              format: double 
+        description:
+          type: string
+        image_url:
+          type: string
+        created_at:
+          type: string
+          format: date
+        is_liked_by_me:
+          type: bool
+        aggregates:
+          type: object
+          properties:
+            total_likes:
+              type: integer
+            total_comments:
+              type: integer
+      required:
+        - author
+        - post_id
+        - image_url
+        - aggregates
+        - is_liked_by_me
+
+    feedPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/feedItem'
+        limit:
+          type: integer
+        offset:
+          type: integer
+
+    like:
+      type: object
+      properties:
+        like_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        post_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+    
