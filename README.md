@@ -95,7 +95,7 @@
   - `Disks_for_throughput = 13KB/s / 100MB/s ~= 0.001`
   - `Disks_for_iops = 3500 / 100 = 35`
 
-`Total_disks = 50 HDD`
+`Total_disks = 16 SSD`
 
 ### Подсистема комментариев
 
@@ -113,5 +113,5 @@
 - `Disks_for_throughput = 5KB/s / 100MB/s ~= 0.0005`
 - `Disks_for_iops = 596 / 100 ~= 6`
 
-`Total_disks = 6 HDD`
+`Total_disks = 1 SSD`
 
