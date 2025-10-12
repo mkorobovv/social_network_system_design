@@ -94,7 +94,7 @@
   - `Disks_for_throughput = 1KB/s (HDD - 1, SSD - 1, SSD-nVME - 1)`
   - `IOPS = 17 (HDD - 1, SSD - 1, SSD-nVME - 1)`
 
-`Total_disks (HDD - 35, SSD - 4, SSD-nVME - 1)`
+`Total_disks (HDD - 1, SSD - 1, SSD-nVME - 1)`
 
 ### Подсистема постов
   - `Capacity = 13KB/s * 86400 * 365 ~= 410 GB (HDD - 1, SSD - 1, SSD-nVME - 1)`
