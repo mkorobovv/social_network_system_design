@@ -82,36 +82,32 @@
 
 ## Оценка дисков
 
+### Подсистема медиа
+  - `Capacity = 51 MB/s * 86400 * 365 = 1.6PB (HDD - 50, SSD - 16, SSD-nVME - 54)`
+  - `IOPS = 3500 (HDD - 35, SSD - 4, SSD-nVME - 1)`
+  - `Throughput = 51 MB/s (HDD - 1, SSD - 1, SSD-nVME - 1)`
+
+`Total_disks (HDD - 50, SSD - 16, SSD-nVME - 54)`
+
+### Подсистема подписок
+  - `Capacity = 1KB/s * 86400 * 365 ~= 32 GB (HDD - 1, SSD - 1, SSD-nVME - 1)`
+  - `Disks_for_throughput = 1KB/s (HDD - 1, SSD - 1, SSD-nVME - 1)`
+  - `IOPS = 17 (HDD - 1, SSD - 1, SSD-nVME - 1)`
+
+`Total_disks (HDD - 35, SSD - 4, SSD-nVME - 1)`
+
 ### Подсистема постов
-    
-- Медиа:
-  - `Capacity = 51 MB/s * 86400 * 365 = 1.6PB`
-  - `Disks_for_capacity = 1.6PB / 32TB = 50`
-  - `Disks_for_throughput = 51 MB/s / 100 MB/s ~= 0.5`
-  - `Disks_for_iops = 3500 / 100 = 35`
-- Метаинформация:
-  - `Capacity = 13KB/s * 86400 * 365 ~= 4 TB`
-  - `Disks_for_capacity = 4 TB / 32TB ~= 0.13`
-  - `Disks_for_throughput = 13KB/s / 100MB/s ~= 0.001`
-  - `Disks_for_iops = 3500 / 100 = 35`
+  - `Capacity = 13KB/s * 86400 * 365 ~= 410 GB (HDD - 1, SSD - 1, SSD-nVME - 1)`
+  - `Disks_for_throughput = 13KB/s (HDD - 1, SSD - 1, SSD-nVME - 1)`
+  - `IOPS = 3500 (HDD - 35, SSD - 4, SSD-nVME - 1)`
 
-`Total_disks = 16 SSD`
-
-### Подсистема комментариев
-
-- `Capacity = 24 KB/s * 86400 * 365 ~= 8 TB`
-- `Disks_for_capacity = 8 TB / 32TB ~= 0.25`
-- `Disks_for_throughput = 24KB/s / 100MB/s ~= 0.002`
-- `Disks_for_iops = 116 / 100 ~= 1.16`
-
-`Total_disks = 1 HDD`
+`Total_disks (HDD - 35, SSD - 4, SSD-nVME - 1)`
 
 ### Подсистема реакций
 
-- `Capacity = 5 KB/s * 86400 * 365 ~= 157 GB`
-- `Disks_for_capacity = 157 GB / 32TB ~= 0.005`
-- `Disks_for_throughput = 5KB/s / 100MB/s ~= 0.0005`
-- `Disks_for_iops = 596 / 100 ~= 6`
+- `Capacity = 24 KB/s * 86400 * 365 + 5 KB/s * 86400 * 365 ~= 1 TB (HDD - 1, SSD - 1, SSD-nVME - 1)`
+- `IOPS= 116 + 596 = 712 (HDD - 8, SSD - 1, SSD-nVME - 1)`
+- `Throughput = 24KB/s + 5 KB/s = 29 KB/s (HDD - 1, SSD - 1, SSD-nVME - 1)`
 
-`Total_disks = 1 SSD`
+`Total_disks = (HDD - 8, SSD - 1, SSD-nVME - 1)`
 
