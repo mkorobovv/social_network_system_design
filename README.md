@@ -79,3 +79,43 @@
 
 - Подсистема поиска:
     - `find_post_by_location = 116 * 100B ~= 12 KB/s`
+
+## Оценка дисков
+
+### Подсистема медиа
+  - `Capacity = 51 MB/s * 86400 * 365 = 1.6PB (HDD - 50, SSD - 16, SSD-nVME - 54)`
+  - `IOPS = 3500 (HDD - 35, SSD - 4, SSD-nVME - 1)`
+  - `Throughput = 51 MB/s (HDD - 1, SSD - 1, SSD-nVME - 1)`
+
+`Total_disks (HDD - 50, SSD - 16, SSD-nVME - 54)`
+
+`Выбираем HDD.`
+
+### Подсистема подписок
+  - `Capacity = 1KB/s * 86400 * 365 ~= 32 GB (HDD - 1, SSD - 1, SSD-nVME - 1)`
+  - `Disks_for_throughput = 1KB/s (HDD - 1, SSD - 1, SSD-nVME - 1)`
+  - `IOPS = 17 (HDD - 1, SSD - 1, SSD-nVME - 1)`
+
+`Total_disks (HDD - 1, SSD - 1, SSD-nVME - 1)`
+
+`Выбираем HDD`
+
+### Подсистема постов
+  - `Capacity = 13KB/s * 86400 * 365 ~= 410 GB (HDD - 1, SSD - 1, SSD-nVME - 1)`
+  - `Disks_for_throughput = 13KB/s (HDD - 1, SSD - 1, SSD-nVME - 1)`
+  - `IOPS = 3500 (HDD - 35, SSD - 4, SSD-nVME - 1)`
+
+`Total_disks (HDD - 35, SSD - 4, SSD-nVME - 1)`
+
+`Выбираем SSD-nVME`
+
+### Подсистема реакций
+
+- `Capacity = 24 KB/s * 86400 * 365 + 5 KB/s * 86400 * 365 ~= 1 TB (HDD - 1, SSD - 1, SSD-nVME - 1)`
+- `IOPS= 116 + 596 = 712 (HDD - 8, SSD - 1, SSD-nVME - 1)`
+- `Throughput = 24KB/s + 5 KB/s = 29 KB/s (HDD - 1, SSD - 1, SSD-nVME - 1)`
+
+`Total_disks = (HDD - 8, SSD - 1, SSD-nVME - 1)`
+
+`Выбираем SSD`
+
