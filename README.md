@@ -119,3 +119,25 @@
 
 `Выбираем SSD`
 
+
+## Оценка хостов
+
+### Подсистема медиа
+
+- `Hosts = 50 / 2 = 25`
+- `Hosts_with_replication = 25 * 3 = 75`
+
+### Подсистема подписок
+
+- `Hosts = 1 / 1 = 1`
+- `Hosts_with_replication = 1 * 3 = 3`
+
+### Подсистема постов
+
+- `Hosts = 1 / 1 = 1`
+- `Hosts_with_replication = 1 * 3 = 3` 
+
+### Подсистема реакций
+
+- `Hosts = 1 / 1 = 1`
+- `Hosts_with_replication = 1 * 3 = 3`

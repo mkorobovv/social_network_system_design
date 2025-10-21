@@ -1,5 +1,12 @@
 // Service reactions
 
+// Replication:
+// - master-slave (one sync + async)
+// - replication factor 3
+//
+// Sharding:
+// - key based by post_id
+
 Table likes {
   like_id uuid [primary key]
   user_id uuid [not null]
