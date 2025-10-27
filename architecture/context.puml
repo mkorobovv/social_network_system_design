@@ -1,0 +1,19 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User")
+Container(apiGateway, "API Gateway", "Software system", "Handles user requests")
+Container(postsSystem, "Posts system", "Software system", "Handles CRUD posts operations")
+Container(mediaSystem, "Media system", "Software system", "Creates media contents")
+Container(followsSystem, "Follows system", "Software system", "Handles CRUD follows operations")
+Container(reactionsSystem, "Reactions system", "Software system", "Handles CRUD reactions operations")
+
+
+Rel(user, apiGateway, "Send requests")
+Rel(apiGateway, postsSystem, "CRUD posts")
+Rel(apiGateway, mediaSystem, "Creates media content")
+Rel(apiGateway, followsSystem, "CRUD follows")
+Rel(apiGateway, reactionsSystem, "CRUD reactions")
+
+
+@endumlco

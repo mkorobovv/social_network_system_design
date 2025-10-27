@@ -1,0 +1,36 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User")
+Container(loadBalancer, "Load Balancer", "Nginx", "Uses round robin")
+Container(reactionsQueue, "Reactions Queue", "Apache Kafka", "Stores reaction events [created, deleted, updated]", $tags="messageQueue")
+Container(followsQueue, "Follows Queue", "Apache Kafka", "Stores follow events [sub, unsub]", $tags="messageQueue")
+
+System_Boundary(postsSystem, "Posts system") {
+    Container(postsService, "Posts Service", "Go", "Handles creation, deletion of posts", $tags="webApp")
+    Container(feedService, "Feed Service", "Go", "Handles getting user feed", $tags="webApp")
+    ContainerDb(postsDatabase, "Posts Database", "PostgreSQL", "Stores posts information",  $tags="db")
+    Container(postsQueue, "Posts Queue", "Apache Kafka", "Stores posts events [created, deleted, updated]", $tags="messageQueue")
+    ContainerDb(feedCache, "Feed Cache", "Tarantool", "Stores prepared feed for users", $tags="db")
+}
+
+System_Boundary(externalSystem, "External system") {
+    Container(reactionsSystem, "Reactions System", "Software system")
+    Container(mediaSystem, "Media system", "Software system")
+    Container(followsSystem, "Follows system", "Software system")
+}
+
+Rel(followsSystem, followsQueue, "Produces follow events")
+Rel(followsQueue, feedService, "Consumes follow events")
+Rel(feedService, postsQueue, "Consumes post events")
+Rel(mediaSystem, postsQueue, "Consumes post events")
+Rel(feedService, feedCache, "Stores prepared feed for users")
+Rel(user, loadBalancer, "CRUD operations with posts", "REST")
+Rel(loadBalancer, postsService, "Create, Delete operations with posts", "REST")
+Rel(loadBalancer, feedService, "Get feed pages", "REST")
+Rel(reactionsQueue, postsService, "Consumes reaction events")
+Rel(reactionsSystem, reactionsQueue, "Produces reaction events")
+Rel(postsService, postsDatabase, "Stores created posts information")
+Rel(postsService, postsQueue, "Produces post events")
+Rel(feedService, postsService, "Get addtitional posts and data for feed", "gRPC")
+@endumlpo

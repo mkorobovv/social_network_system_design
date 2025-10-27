@@ -119,3 +119,44 @@
 
 `Выбираем SSD`
 
+## Дизайн системы
+
+<p align="center">
+    </br><b>Level 1.</b> System context diagram</br></br>
+</p>
+
+<p align="center">
+  <img src="images/diagrams/context_system.png" />
+</p>
+
+<p align="center">
+    </br><b>Level 2.</b> Posts system diagram</br></br>
+</p> 
+
+<p align="center">
+  <img src="images/diagrams/containers/posts_system.png" />
+</p>
+
+<p align="center">
+    </br><b>Level 2.</b> Follows system diagram</br></br>
+</p> 
+
+<p align="center">
+  <img src="images/diagrams/containers/follows_system.png" />
+</p>
+
+<p align="center">
+    </br><b>Level 2.</b> Reactions system diagram</br></br>
+</p> 
+
+<p align="center">
+  <img src="images/diagrams/containers/reactions_system.png" />
+</p>
+
+<p align="center">
+    </br><b>Level 2.</b> Media system diagram</br></br>
+</p> 
+
+<p align="center">
+  <img src="images/diagrams/containers/media_system.png" />
+</p>
