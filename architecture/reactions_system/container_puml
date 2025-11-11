@@ -1,10 +1,9 @@
 @startuml
-!theme aws-orange
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
 Person(user, "User")
 Container(loadBalancer, "Load Balancer", "Nginx", "Uses round robin")
-Container(reactionsQueue, "Reactions Queue", "Apache Kafka", "Stores reaction events [created, deleted, updated]", $tags="messageQueue")
+Container(eventsQueue, "Events Queue", "Apache Kafka", "Stores reaction events [created, deleted, updated]")
 
 System_Boundary(reactionsSystem, "Reactions system") {
     Container(reactionsService, "Reactions Service", "Go", "Handles creation, deletion of reactions", $tags="webApp")
@@ -17,7 +16,7 @@ System_Boundary(externalSystem, "External system") {
 
 Rel(user, loadBalancer, "CRUD operations with reactions", "REST")
 Rel(loadBalancer, reactionsService, "CRUD operations with reactions", "REST")
-Rel(reactionsQueue, postsSystem, "Consumes reaction events")
-Rel(reactionsService, reactionsQueue, "Produces reaction events")
+Rel(eventsQueue, postsSystem, "Consumes reaction events")
+Rel(reactionsService, eventsQueue, "Produces reaction events")
 Rel(reactionsService, reactionsDatabase, "Stores created posts information")
 @enduml

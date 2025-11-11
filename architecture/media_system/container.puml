@@ -3,7 +3,7 @@
 
 Person(user, "User")
 Container(loadBalancer, "Load Balancer", "Nginx", "Uses round robin")
-Container(postsQueue, "Posts Queue", "Apache Kafka", "Stores posts events", $tags="messageQueue")
+Container(eventsQueue, "Events Queue", "Apache Kafka", "Stores events [created, deleted, updated]")
 
 System_Boundary(mediaSystem, "Media system") {
     Container(mediaService, "Media Service", "Go", "Handles creation, deletion of reactions", $tags="webApp")
@@ -16,7 +16,7 @@ System_Boundary(externalSystem, "External system") {
 
 Rel(user, loadBalancer, "Load images", "REST")
 Rel(loadBalancer, mediaService, "Load images", "REST")
-Rel(postsQueue, mediaService, "Consumes posts events")
-Rel(postsSystem, postsQueue, "Produces posts events")
+Rel(eventsQueue, mediaService, "Consumes topic_posts events")
+Rel(postsSystem, eventsQueue, "Produces topic_posts events")
 Rel(mediaService, mediaStorage, "Stores media content")
 @endumlme

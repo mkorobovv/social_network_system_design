@@ -3,7 +3,7 @@
 
 Person(user, "User")
 Container(loadBalancer, "Load Balancer", "Nginx", "Uses round robin")
-Container(followsQueue, "Follows Queue", "Apache Kafka", "Stores follow events [followed, unfollowed]", $tags="messageQueue")
+Container(eventsQueue, "Events Queue", "Apache Kafka", "Stores events [created, updated, deleted]")
 
 System_Boundary(followsSystem, "Follows system") {
     Container(followsService, "Follows Service", "Go", "Handles following, unfollowing mechanism", $tags="webApp")
@@ -16,7 +16,7 @@ System_Boundary(externalSystem, "External systems") {
 
 Rel(user, loadBalancer, "CRUD operations with follows", "REST")
 Rel(loadBalancer, followsService, "CRUD operations with follows", "REST")
-Rel(followsQueue, postsSystem, "Consumes follow events")
-Rel(followsService, followsQueue, "Produces follow events")
+Rel(eventsQueue, postsSystem, "Consumes topic_follows events")
+Rel(followsService, eventsQueue, "Produces topic_follows events")
 Rel(followsService, followsDatabase, "Stores follows information")
 @enduml
