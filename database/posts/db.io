@@ -1,5 +1,12 @@
 // Service posts
 
+// Replication:
+// - master-slave (one sync + async)
+// - replication factor 3
+//
+// Sharding:
+// - key based by user_id
+
 Table posts {
   post_id uuid [primary key]
   user_id uuid [not null]

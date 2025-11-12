@@ -1,5 +1,12 @@
 // Service users
 
+// Replication:
+// - master-slave (one sync + async)
+// - replication factor 3
+//
+// Sharding:
+// - key based by user_id
+
 Table users {
   user_id uuid [primary key]
   username string [not null, unique]
