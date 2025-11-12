@@ -1,0 +1,22 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User")
+Container(loadBalancer, "Load Balancer", "Nginx", "Uses round robin")
+Container(eventsQueue, "Events Queue", "Apache Kafka", "Stores events [created, deleted, updated]")
+
+System_Boundary(mediaSystem, "Media system") {
+    Container(mediaService, "Media Service", "Go", "Handles creation, deletion of reactions", $tags="webApp")
+    ContainerDb(mediaStorage, "Media Storage", "Ceph S3", "Stores media content",  $tags="db")
+}
+
+System_Boundary(externalSystem, "External system") {
+    Container(postsSystem, "Posts System", "Software system")
+}
+
+Rel(user, loadBalancer, "Load images", "REST")
+Rel(loadBalancer, mediaService, "Load images", "REST")
+Rel(eventsQueue, mediaService, "Consumes topic_posts events")
+Rel(postsSystem, eventsQueue, "Produces topic_posts events")
+Rel(mediaService, mediaStorage, "Stores media content")
+@endumlme

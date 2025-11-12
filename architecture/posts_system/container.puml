@@ -1,0 +1,34 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "User")
+Container(loadBalancer, "Load Balancer", "Nginx", "Uses round robin")
+Container(eventsQueue, "Events Queue", "Apache Kafka", "Stores events [created, deleted, updated]")
+
+System_Boundary(postsSystem, "Posts system") {
+    Container(postsService, "Posts Service", "Go", "Handles creation, deletion of posts", $tags="webApp")
+    Container(feedService, "Feed Service", "Go", "Handles getting user feed", $tags="webApp")
+    ContainerDb(postsDatabase, "Posts Database", "PostgreSQL", "Stores posts information",  $tags="db")
+    ContainerDb(feedCache, "Feed Cache", "Tarantool", "Stores prepared feed for users", $tags="db")
+}
+
+System_Boundary(externalSystem, "External system") {
+    Container(reactionsSystem, "Reactions System", "Software system")
+    Container(mediaSystem, "Media system", "Software system")
+    Container(followsSystem, "Follows system", "Software system")
+}
+
+Rel(followsSystem, eventsQueue, "Produces topic_follows events")
+Rel(eventsQueue, feedService, "Consumes topic_follows events")
+Rel(eventsQueue, feedService, "Consumes topic_posts events")
+Rel(eventsQueue, mediaSystem, "Consumes topic_posts events")
+Rel(feedService, feedCache, "Stores prepared feed for users")
+Rel(user, loadBalancer, "CRUD operations with posts", "REST")
+Rel(loadBalancer, postsService, "Create, Delete operations with posts", "REST")
+Rel(loadBalancer, feedService, "Get feed pages", "REST")
+Rel(eventsQueue, postsService, "Consumes topic_reactions events")
+Rel(reactionsSystem, eventsQueue, "Produces topic_reactions events")
+Rel(postsService, postsDatabase, "Stores created posts information")
+Rel(postsService, eventsQueue, "Produces topic_posts events")
+Rel(feedService, postsService, "Get addtitional posts and data for feed", "gRPC")
+@endumlpo
